@@ -64,7 +64,7 @@ export const getQuestionsPage = (page: number = 1, perPage: number = 10) => {
                     const lastPage = Math.ceil(data[0].totalQuestions[0].count / perPage);
 
                     let pageData = {
-                        questions: data[0].questions,
+                        data: data[0].questions,
                         pagination: {
                             currentPage: page,
                             nextPage: page + 1,

@@ -1,9 +1,12 @@
 import * as express from "express";
+import * as cors from "cors";
 import questionsRouter from "src/Routes/Questions";
 import { checkJwt } from "src/Data/Auth";
 
 // Initialize our Express Application
 const app = express();
+
+app.use(cors());
 
 app.get("/validate", checkJwt, (req, res) => {
     res.send({
