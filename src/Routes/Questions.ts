@@ -27,20 +27,29 @@ questionsRouter.get("/list", (req, res) => {
 
     getQuestionsPage(page, perPage, search).then((page: any) => {
         res.send(page);
-    }).catch(console.log);
+    }).catch((err) => {
+        res.sendStatus(500);
+        res.send(err);
+    });
 });
 
 questionsRouter.get("/:questionId", (req, res) => {
     let id = req.params.questionId;
     getQuestionById(id).then((question: IQuestion) => {
         res.send(question);
-    }).catch(console.log);
+    }).catch((err) => {
+        res.sendStatus(500);
+        res.send(err);
+    });
 });
 
 questionsRouter.post("/:questionId", (req, res) => {
     updateQuestion(req?.body).then(() => {
         res.send(req?.body);
-    }).catch(console.log);
+    }).catch((err) => {
+        res.sendStatus(500);
+        res.send(err);
+    });
 });
 
 questionsRouter.put("", (req, res) => {
@@ -49,7 +58,10 @@ questionsRouter.put("", (req, res) => {
             ...req?.body,
             _id
         })
-    }).catch(console.log);
+    }).catch((err) => {
+        res.sendStatus(500);
+        res.send(err);
+    });
 });
 
 export default questionsRouter;
