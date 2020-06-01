@@ -45,35 +45,42 @@ export const getQuestionsPage = (page: number = 1, perPage: number = 10, search?
             { $limit: perPage } // Limit to our per page amount
         ];
 
+        let pipeline: Object[] = [
+            {
+                $facet: {
+                    questions: questionsFacets,
+                    totalQuestions:  [
+                        {
+                            $count: "count"
+                        }
+                    ]
+                }
+            }
+        ];
+
+        if (search?.length > 0) {
+            pipeline.unshift(
+                {
+                    $match: {
+                        $text: {
+                            $search: search
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        score: {
+                            $meta: "textScore"
+                        }
+                    }
+                },
+            );
+        }
+
         executeDB((db: Db) => {
             db
                 .collection("questions").aggregate(
-                    [
-                        {
-                            $match: {
-                                $text: {
-                                    $search: search
-                                }
-                            }
-                        },
-                        {
-                            $addFields: {
-                                score: {
-                                    $meta: "textScore"
-                                }
-                            }
-                        },
-                        {
-                            $facet: {
-                                questions: questionsFacets,
-                                totalQuestions:  [
-                                    {
-                                        $count: "count"
-                                    }
-                                ]
-                            }
-                        }
-                    ]
+                    pipeline
                 )
                 .toArray()
                 .then((data: any) => {

@@ -28,6 +28,7 @@ questionsRouter.get("/list", (req, res) => {
     getQuestionsPage(page, perPage, search).then((page: any) => {
         res.send(page);
     }).catch((err) => {
+        console.log(err);
         res.sendStatus(500);
         res.send(err);
     });
