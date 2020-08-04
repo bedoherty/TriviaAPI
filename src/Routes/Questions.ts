@@ -20,18 +20,24 @@ questionsRouter.get("/random", (req, res) => {
 });
 
 questionsRouter.get("/list", (req, res) => {
-    const { page: pageString, perPage: perPageString, search: searchString } = req.query;
+    const { page: pageString, perPage: perPageString, search: searchString,
+        reported: reportedString } = req.query;
     const page = Number.parseInt(pageString.toString());
     const perPage = Number.parseInt(perPageString.toString());
     const search = searchString?.toString();
+    const reported = "true" === reportedString?.toString();
 
-    getQuestionsPage(page, perPage, search).then((page: any) => {
-        res.send(page);
-    }).catch((err) => {
+    try {
+        getQuestionsPage(page, perPage, search, reported).then((page: any) => {
+            res.send(page);
+        }).catch((err) => {
+            console.log(err);
+            // res.sendStatus(500);
+            res.status(500).send(err);
+        });
+    } catch(err) {
         console.log(err);
-        res.sendStatus(500);
-        res.send(err);
-    });
+    }
 });
 
 questionsRouter.get("/:questionId", (req, res) => {

@@ -38,7 +38,7 @@ export const getRandomQuestion = () => {
     });
 }
 
-export const getQuestionsPage = (page: number = 1, perPage: number = 10, search?: string) => {
+export const getQuestionsPage = (page: number = 1, perPage: number = 10, search?: string, reported?: boolean) => {
     return new Promise((resolve, reject) => {
         const questionsFacets: Object[] = [
             { $skip: (page - 1) * perPage }, // Skip pages we have already traversed
@@ -46,16 +46,6 @@ export const getQuestionsPage = (page: number = 1, perPage: number = 10, search?
         ];
 
         let pipeline: Object[] = [
-            {
-                $facet: {
-                    questions: questionsFacets,
-                    totalQuestions:  [
-                        {
-                            $count: "count"
-                        }
-                    ]
-                }
-            }
         ];
 
         if (search?.length > 0) {
@@ -77,6 +67,27 @@ export const getQuestionsPage = (page: number = 1, perPage: number = 10, search?
             );
         }
 
+        if (reported) {
+            pipeline.push({
+                $match: {
+                    reported: true
+                }
+            });
+        }
+
+        pipeline.push({
+            $facet: {
+                questions: questionsFacets,
+                totalQuestions:  [
+                    {
+                        $count: "count"
+                    }
+                ]
+            }
+        });
+
+        console.log(pipeline);
+
         executeDB((db: Db) => {
             db
                 .collection("questions").aggregate(
@@ -84,7 +95,12 @@ export const getQuestionsPage = (page: number = 1, perPage: number = 10, search?
                 )
                 .toArray()
                 .then((data: any) => {
+                    console.log("Executed Query");
                     const lastPage = Math.ceil(data?.[0]?.totalQuestions?.[0]?.count / perPage);
+
+                    if (data?.length <= 0) {
+                        reject();
+                    }
 
                     let pageData = {
                         data: data[0].questions,
